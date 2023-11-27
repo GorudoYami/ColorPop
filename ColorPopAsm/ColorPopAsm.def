@@ -1,0 +1,2 @@
+LIBRARY ColorPopAsmProcessor
+EXPORTS MyProc1
