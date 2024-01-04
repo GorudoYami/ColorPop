@@ -150,6 +150,7 @@ partial class MainWindow
 		tbImageLocation.Name = "tbImageLocation";
 		tbImageLocation.Size = new Size(185, 23);
 		tbImageLocation.TabIndex = 0;
+		tbImageLocation.TextChanged += TbImageLocation_TextChanged;
 		// 
 		// btnBrowse
 		// 
@@ -160,6 +161,7 @@ partial class MainWindow
 		btnBrowse.TabIndex = 1;
 		btnBrowse.Text = "...";
 		btnBrowse.UseVisualStyleBackColor = true;
+		btnBrowse.Click += BtnBrowse_Click;
 		// 
 		// gbColors
 		// 
@@ -325,6 +327,7 @@ partial class MainWindow
 		// 
 		tlpThreads.SetColumnSpan(tbThreads, 2);
 		tbThreads.Dock = DockStyle.Fill;
+		tbThreads.Enabled = false;
 		tbThreads.Location = new Point(3, 34);
 		tbThreads.Name = "tbThreads";
 		tbThreads.PlaceholderText = "Enter thread count";
@@ -363,6 +366,7 @@ partial class MainWindow
 		btnProcess.TabIndex = 8;
 		btnProcess.Text = "Process";
 		btnProcess.UseVisualStyleBackColor = true;
+		btnProcess.Click += BtnProcess_Click;
 		// 
 		// MainWindow
 		// 
