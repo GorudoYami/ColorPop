@@ -1,0 +1,9 @@
+1. Zweryfikowanie innych formatów podczas przetwarzania przez C# (wygl¹da na to, ¿e tablica nie jest w formacie ARGB za ka¿dym razem)
+2. Poprawienie procedurki ASM:
+	- Przy braku podania koloru, zwraca ten sam obraz
+	- Przy podaniu kolorów, przetworzony obraz ma tylko czarne pionowe paski
+3. Poprawienie crashów:
+	- Przy wywo³aniu przetwarzania ASM chyba coœ jest nie tak i zawiesza kompletnie VS
+	- Problem mo¿e te¿ byæ przy wywo³aniu przetwarzania lub wielow¹tkowoœci ASM
+4. Walidacja wpisanych danych do widoku
+5. Zmiana typu threshold na byte
