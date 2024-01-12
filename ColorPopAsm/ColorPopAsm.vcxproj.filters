@@ -15,11 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ColorPopProcessor.asm">
+    <None Include="ColorPopAsm.def">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="ColorPopProcessor.def">
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="ColorPopAsm.asm">
       <Filter>Source Files</Filter>
-    </None>
+    </MASM>
   </ItemGroup>
 </Project>

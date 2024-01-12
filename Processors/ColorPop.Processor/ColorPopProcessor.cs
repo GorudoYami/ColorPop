@@ -6,91 +6,51 @@ using System.Runtime.Versioning;
 namespace ColorPop.Processor;
 
 [SupportedOSPlatform("Windows6.1")]
-public class ColorPopProcessor : IColorPopProcessor
+public class ColorPopProcessor : ColorPopProcessorBase
 {
-	public long ProcessTimeMilliseconds { get; private set; }
-
-	private const double _redFactor = 0.299;
-	private const double _greenFactor = 0.587;
-	private const double _blueFactor = 0.114;
-
-	private readonly ICollection<Color> _colors;
-	private readonly Bitmap _originalImage;
-	private readonly Bitmap _processedImage;
-	private readonly int _threshold;
-	private readonly int _threadCount;
-
-	public ColorPopProcessor(Bitmap originalImage, ICollection<Color> colors, int threshold, int threadCount)
+	public ColorPopProcessor(byte[] originalBitmapData, IEnumerable<Color> colors, int threshold, int threadCount)
+		: base(originalBitmapData, colors, threshold, threadCount)
 	{
-		_originalImage = originalImage;
-		_processedImage = new Bitmap(_originalImage.Width, _originalImage.Height);
-		_colors = colors;
-		_threshold = threshold;
-		_threadCount = threadCount;
 	}
 
-	public async Task<Bitmap> ProcessAsync()
+	protected override void ProcessChunk(int startIndex, int endIndex)
 	{
-		int chunkWidth = _originalImage.Width / _threadCount;
-		int chunkHeight = _originalImage.Height / _threadCount;
-
-		var tasks = new List<Task>();
-		var stopwatch = Stopwatch.StartNew();
-		for (int y = 0; y < _threadCount; y++)
+		for (int index = startIndex; index + 4 < endIndex; index += 4)
 		{
-			for (int x = 0; x < _threadCount; x++)
-			{
-				int startX = x * chunkWidth;
-				int startY = y * chunkHeight;
-				int endX = startX + chunkWidth;
-				int endY = startY + chunkHeight;
+			var pixel = new Pixel(
+				_bitmapData[index],
+				_bitmapData[index + 1],
+				_bitmapData[index + 2]
+			);
 
-				tasks.Add(Task.Run(() => ProcessChunk(startX, startY, endX, endY)));
-			}
-		}
+			ProcessPixel(pixel);
 
-		await Task.WhenAll(tasks);
-
-		stopwatch.Stop();
-		ProcessTimeMilliseconds = stopwatch.ElapsedMilliseconds;
-
-		return _processedImage;
-	}
-
-	private void ProcessChunk(int startX, int startY, int endX, int endY)
-	{
-		for (int y = startY; y < endY; y++)
-		{
-			for (int x = startX; x < endX; x++)
-			{
-				Color originalColor = _originalImage.GetPixel(x, y);
-				Color processedColor = ProcessPixel(originalColor);
-
-				_processedImage.SetPixel(x, y, processedColor);
-			}
+			_bitmapData[index] = pixel.Red;
+			_bitmapData[index + 1] = pixel.Green;
+			_bitmapData[index + 2] = pixel.Blue;
 		}
 	}
 
-	private Color ProcessPixel(Color originalColor)
+	private void ProcessPixel(Pixel pixel)
 	{
-		foreach (Color targetColor in _colors)
+		if (_colors.Any(x => AreColorsMatching(pixel, x)))
 		{
-			if (AreColorsMatching(originalColor, targetColor))
-			{
-				return originalColor;
-			}
+			return;
 		}
 
-		int luminance = (int)(_redFactor * originalColor.R + _greenFactor * originalColor.G + _blueFactor * originalColor.B);
-		return Color.FromArgb(luminance, luminance, luminance);
+		int luminance = (int)(_redFactor * pixel.Red + _greenFactor * pixel.Green + _blueFactor * pixel.Blue);
+
+		pixel.Red = (byte)luminance;
+		pixel.Green = (byte)luminance;
+		pixel.Blue = (byte)luminance;
 	}
 
-	private bool AreColorsMatching(Color colorA, Color colorB)
+	private bool AreColorsMatching(Pixel originalPixel, Color targetColor)
 	{
-		int deltaR = Math.Abs(colorA.R - colorB.R);
-		int deltaG = Math.Abs(colorA.G - colorB.G);
-		int deltaB = Math.Abs(colorA.B - colorB.B);
+		int deltaR = Math.Abs(originalPixel.Red - targetColor.R);
+		int deltaG = Math.Abs(originalPixel.Green - targetColor.G);
+		int deltaB = Math.Abs(originalPixel.Blue - targetColor.B);
 
-		return (deltaR + deltaG + deltaB <= _threshold);
+		return deltaR <= _threshold && deltaG <= _threshold && deltaB <= _threshold;
 	}
 }

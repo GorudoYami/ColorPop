@@ -1,2 +1,2 @@
 LIBRARY ColorPopAsmProcessor
-EXPORTS MyProc1
+EXPORTS ProcessChunk

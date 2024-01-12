@@ -1,13 +1,37 @@
+using ColorPop.App.Models;
+using ColorPop.AsmProcessor;
+using ColorPop.Common;
+using ColorPop.Processor;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace ColorPop.App;
 
 public partial class MainWindow : Form
 {
+	private readonly BindingList<ColorViewModel> _colors;
+	private readonly BindingSource _bindingSource;
+
 	public MainWindow()
 	{
+		_colors = new BindingList<ColorViewModel>();
+		_bindingSource = new BindingSource(_colors, null);
+
 		InitializeComponent();
+		InitializeGridView();
 		SetInitialValues();
+	}
+
+	private void InitializeGridView()
+	{
+		dgvColors.AutoGenerateColumns = false;
+		dgvColors.Columns[$"col{nameof(ColorViewModel.Red)}"].DataPropertyName = nameof(ColorViewModel.Red);
+		dgvColors.Columns[$"col{nameof(ColorViewModel.Green)}"].DataPropertyName = nameof(ColorViewModel.Green);
+		dgvColors.Columns[$"col{nameof(ColorViewModel.Blue)}"].DataPropertyName = nameof(ColorViewModel.Blue);
+		dgvColors.Columns[$"col{nameof(ColorViewModel.ColorPreview)}"].DataPropertyName = nameof(ColorViewModel.ColorPreview);
+		dgvColors.DataSource = _bindingSource;
 	}
 
 	private void SetInitialValues()
@@ -25,26 +49,29 @@ public partial class MainWindow : Form
 
 		dialog.ShowDialog(this);
 		tbImageLocation.Text = dialog.FileName;
-	}
 
-	private void TbImageLocation_TextChanged(object sender, EventArgs e)
-	{
-		Debug.WriteLine("text changed");
-	}
-
-	private void BtnProcess_Click(object sender, EventArgs e)
-	{
 		if (!ValidateFile())
 		{
 			return;
 		}
 
-		Process();
+		pbMain.Image = new Bitmap(tbImageLocation.Text);
+		pbMain.Cursor = Cursors.Cross;
+	}
+
+	private async void BtnProcess_Click(object sender, EventArgs e)
+	{
+		await ProcessAsync();
 	}
 
 	private bool ValidateFile()
 	{
-		if (!File.Exists(tbImageLocation.Text))
+		if (string.IsNullOrWhiteSpace(tbImageLocation.Text))
+		{
+			MessageBox.Show("Please select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			return false;
+		}
+		else if (!File.Exists(tbImageLocation.Text))
 		{
 			MessageBox.Show("File does not exist", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			return false;
@@ -53,8 +80,124 @@ public partial class MainWindow : Form
 		return true;
 	}
 
-	private void Process()
+	private async Task ProcessAsync()
 	{
+		byte[] bitmapData = GetBitmapData();
+		IEnumerable<Color> colors = GetColors();
+		int threshold = GetThreshold();
+		int threadCount = GetThreadCount();
 
+		var processor = ResolveProcessor(bitmapData, colors, threshold, threadCount);
+
+		byte[] processedBitmapData = await processor.ProcessAsync();
+		using var processedBitmap = new Bitmap(tbImageLocation.Text);
+		SetBitmapData(processedBitmap, processedBitmapData);
+		ShowResult(processedBitmap, processor.ProcessingTimeMilliseconds);
+	}
+
+	private byte[] GetBitmapData()
+	{
+		using var bitmap = new Bitmap(tbImageLocation.Text);
+		var rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+		BitmapData bmpData = bitmap.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+		IntPtr ptr = bmpData.Scan0;
+		int bytes = Math.Abs(bmpData.Stride) * bitmap.Height;
+		byte[] rgbValues = new byte[bytes];
+		Marshal.Copy(ptr, rgbValues, 0, bytes);
+		bitmap.UnlockBits(bmpData);
+		return rgbValues;
+	}
+
+	private static void SetBitmapData(Bitmap bitmap, byte[] bitmapData)
+	{
+		var rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+		BitmapData bmpData = bitmap.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+		IntPtr ptr = bmpData.Scan0;
+		int bytes = Math.Abs(bmpData.Stride) * bitmap.Height;
+		Marshal.Copy(bitmapData, 0, ptr, bytes);
+		bitmap.UnlockBits(bmpData);
+	}
+
+	private IEnumerable<Color> GetColors()
+	{
+		return _colors.ToList().Select(x => x.Color);
+	}
+
+	private int GetThreshold()
+	{
+		return int.Parse(tbThreshold.Text);
+	}
+
+	private int GetThreadCount()
+	{
+		return int.Parse(tbThreads.Text);
+	}
+
+	private IColorPopProcessor ResolveProcessor(byte[] bitmapData, IEnumerable<Color> colors, int threshold, int threadCount)
+	{
+		return rbAssembly.Checked
+			? new ColorPopAsmProcessor(bitmapData, colors, threshold, threadCount)
+			: new ColorPopProcessor(bitmapData, colors, threshold, threadCount);
+	}
+
+	private void ShowResult(Bitmap processedImage, long processTimeMilliseconds)
+	{
+		using var dialog = new ResultDialog(processedImage, processTimeMilliseconds);
+		dialog.ShowDialog(this);
+	}
+
+	private void PbMain_MouseClick(object sender, MouseEventArgs e)
+	{
+		Color color = GetColorFromImage(e.Location);
+		_colors.Add(new ColorViewModel(color));
+	}
+
+	private Color GetColorFromImage(Point point)
+	{
+		Size displayedImageSize = GetDisplayedImageSize(out int topOffset, out int leftOffset);
+		Size imageSize = pbMain.Image.Size;
+
+		float scaleX = (float)imageSize.Width / displayedImageSize.Width;
+		float scaleY = (float)imageSize.Height / displayedImageSize.Height;
+
+		int imageX = (int)((point.X - leftOffset) * scaleX);
+		int imageY = (int)((point.Y - topOffset) * scaleY);
+
+		using (var bitmap = new Bitmap(pbMain.Image))
+		{
+			if (imageX >= 0 && imageX < imageSize.Width && imageY >= 0 && imageY < imageSize.Height)
+			{
+				return bitmap.GetPixel(imageX, imageY);
+			}
+		}
+
+		return Color.White;
+	}
+
+	private Size GetDisplayedImageSize(out int topOffset, out int leftOffset)
+	{
+		topOffset = 0;
+		leftOffset = 0;
+
+		Size containerSize = pbMain.ClientSize;
+		float containerAspectRatio = (float)containerSize.Height / (float)containerSize.Width;
+		Size originalImageSize = pbMain.Image.Size;
+		float imageAspectRatio = (float)originalImageSize.Height / (float)originalImageSize.Width;
+
+		var result = new Size();
+		if (containerAspectRatio > imageAspectRatio)
+		{
+			result.Width = containerSize.Width;
+			result.Height = (int)(imageAspectRatio * containerSize.Width);
+			topOffset = (containerSize.Height - result.Height) / 2;
+		}
+		else
+		{
+			result.Height = containerSize.Height;
+			result.Width = (int)((1.0f / imageAspectRatio) * containerSize.Height);
+			leftOffset = (containerSize.Width - result.Width) / 2;
+		}
+
+		return result;
 	}
 }

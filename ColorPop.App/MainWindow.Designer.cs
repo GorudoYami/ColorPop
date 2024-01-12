@@ -28,7 +28,7 @@ partial class MainWindow
 	/// </summary>
 	private void InitializeComponent()
 	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
+		DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
 		tlpMain = new TableLayoutPanel();
 		pbMain = new PictureBox();
 		gbImageLocation = new GroupBox();
@@ -37,10 +37,10 @@ partial class MainWindow
 		btnBrowse = new Button();
 		gbColors = new GroupBox();
 		dgvColors = new DataGridView();
-		cnRed = new DataGridViewTextBoxColumn();
-		cnGreen = new DataGridViewTextBoxColumn();
-		cnBlue = new DataGridViewTextBoxColumn();
-		cnColor = new DataGridViewImageColumn();
+		colRed = new DataGridViewTextBoxColumn();
+		colGreen = new DataGridViewTextBoxColumn();
+		colBlue = new DataGridViewTextBoxColumn();
+		colColorPreview = new DataGridViewImageColumn();
 		gbMode = new GroupBox();
 		tlpMode = new TableLayoutPanel();
 		rbCS = new RadioButton();
@@ -106,7 +106,6 @@ partial class MainWindow
 		// 
 		pbMain.BackColor = SystemColors.Control;
 		pbMain.Dock = DockStyle.Fill;
-		pbMain.Image = (Image)resources.GetObject("pbMain.Image");
 		pbMain.Location = new Point(3, 3);
 		pbMain.Name = "pbMain";
 		tlpMain.SetRowSpan(pbMain, 15);
@@ -114,6 +113,7 @@ partial class MainWindow
 		pbMain.SizeMode = PictureBoxSizeMode.Zoom;
 		pbMain.TabIndex = 2;
 		pbMain.TabStop = false;
+		pbMain.MouseClick += PbMain_MouseClick;
 		// 
 		// gbImageLocation
 		// 
@@ -150,7 +150,6 @@ partial class MainWindow
 		tbImageLocation.Name = "tbImageLocation";
 		tbImageLocation.Size = new Size(185, 23);
 		tbImageLocation.TabIndex = 0;
-		tbImageLocation.TextChanged += TbImageLocation_TextChanged;
 		// 
 		// btnBrowse
 		// 
@@ -180,7 +179,7 @@ partial class MainWindow
 		dgvColors.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 		dgvColors.BackgroundColor = SystemColors.Control;
 		dgvColors.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-		dgvColors.Columns.AddRange(new DataGridViewColumn[] { cnRed, cnGreen, cnBlue, cnColor });
+		dgvColors.Columns.AddRange(new DataGridViewColumn[] { colRed, colGreen, colBlue, colColorPreview });
 		dgvColors.Dock = DockStyle.Fill;
 		dgvColors.Location = new Point(3, 19);
 		dgvColors.MultiSelect = false;
@@ -191,29 +190,41 @@ partial class MainWindow
 		dgvColors.Size = new Size(239, 122);
 		dgvColors.TabIndex = 0;
 		// 
-		// cnRed
+		// colRed
 		// 
-		cnRed.HeaderText = "Red";
-		cnRed.MinimumWidth = 25;
-		cnRed.Name = "cnRed";
+		colRed.FillWeight = 100.611809F;
+		colRed.HeaderText = "Red";
+		colRed.MinimumWidth = 50;
+		colRed.Name = "colRed";
 		// 
-		// cnGreen
+		// colGreen
 		// 
-		cnGreen.HeaderText = "Green";
-		cnGreen.MinimumWidth = 25;
-		cnGreen.Name = "cnGreen";
+		colGreen.FillWeight = 101.52285F;
+		colGreen.HeaderText = "Green";
+		colGreen.MinimumWidth = 50;
+		colGreen.Name = "colGreen";
 		// 
-		// cnBlue
+		// colBlue
 		// 
-		cnBlue.HeaderText = "Blue";
-		cnBlue.MinimumWidth = 25;
-		cnBlue.Name = "cnBlue";
+		colBlue.FillWeight = 97.93338F;
+		colBlue.HeaderText = "Blue";
+		colBlue.MinimumWidth = 50;
+		colBlue.Name = "colBlue";
 		// 
-		// cnColor
+		// colColorPreview
 		// 
-		cnColor.HeaderText = "Color";
-		cnColor.MinimumWidth = 25;
-		cnColor.Name = "cnColor";
+		dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleCenter;
+		dataGridViewCellStyle1.NullValue = null;
+		dataGridViewCellStyle1.Padding = new Padding(3);
+		colColorPreview.DefaultCellStyle = dataGridViewCellStyle1;
+		colColorPreview.FillWeight = 99.93201F;
+		colColorPreview.HeaderText = "Color";
+		colColorPreview.ImageLayout = DataGridViewImageCellLayout.Zoom;
+		colColorPreview.MinimumWidth = 50;
+		colColorPreview.Name = "colColorPreview";
+		colColorPreview.ReadOnly = true;
+		colColorPreview.Resizable = DataGridViewTriState.True;
+		colColorPreview.SortMode = DataGridViewColumnSortMode.Automatic;
 		// 
 		// gbMode
 		// 
@@ -410,10 +421,6 @@ partial class MainWindow
 	private Button btnProcess;
 	private Button btnBrowse;
 	private DataGridView dgvColors;
-	private DataGridViewTextBoxColumn cnRed;
-	private DataGridViewTextBoxColumn cnGreen;
-	private DataGridViewTextBoxColumn cnBlue;
-	private DataGridViewImageColumn cnColor;
 	private TableLayoutPanel tlpMode;
 	private RadioButton rbCS;
 	private RadioButton rbAssembly;
@@ -422,4 +429,8 @@ partial class MainWindow
 	private RadioButton rbCustom;
 	private TextBox tbThreads;
 	private TextBox tbThreshold;
+	private DataGridViewTextBoxColumn colRed;
+	private DataGridViewTextBoxColumn colGreen;
+	private DataGridViewTextBoxColumn colBlue;
+	private DataGridViewImageColumn colColorPreview;
 }

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ColorPop.App": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
