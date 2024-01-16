@@ -11,6 +11,7 @@ namespace ColorPop.App;
 
 public partial class MainWindow : Form
 {
+	private const int _averageCount = 5;
 	private readonly BindingList<ColorViewModel> _colors;
 	private readonly BindingSource _bindingSource;
 	private readonly ErrorProvider _threadsErrorProvider;
@@ -86,6 +87,11 @@ public partial class MainWindow : Form
 
 	private async Task ProcessAsync()
 	{
+		if (!ValidateFile())
+		{
+			return;
+		}
+
 		byte[] bitmapData = GetBitmapData();
 		IEnumerable<Color> colors = GetColors();
 		byte threshold = GetThreshold();
@@ -251,5 +257,29 @@ public partial class MainWindow : Form
 		{
 			_threadsErrorProvider.Clear();
 		}
+	}
+
+	private async void BtnAverage_Click(object sender, EventArgs e)
+	{
+		if (!ValidateFile())
+		{
+			return;
+		}
+
+		IEnumerable<Color> colors = GetColors();
+		byte threshold = GetThreshold();
+		int threadCount = GetThreadCount();
+
+		var times = new List<long>();
+		for (int i = 0; i < _averageCount; i++)
+		{
+			byte[] bitmapData = GetBitmapData();
+			var processor = ResolveProcessor(bitmapData, colors, threshold, threadCount);
+			await processor.ProcessAsync();
+			times.Add(processor.ProcessingTimeMilliseconds);
+		}
+
+		long averageTime = (long)times.Average();
+		MessageBox.Show($"Average processing time: {averageTime} ms", "Average processing time", MessageBoxButtons.OK, MessageBoxIcon.Information);
 	}
 }

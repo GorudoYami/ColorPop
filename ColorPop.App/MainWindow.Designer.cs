@@ -54,6 +54,7 @@ partial class MainWindow
 		tlpThreshold = new TableLayoutPanel();
 		tbThreshold = new TextBox();
 		btnProcess = new Button();
+		btnAverage = new Button();
 		tlpMain.SuspendLayout();
 		((System.ComponentModel.ISupportInitialize)pbMain).BeginInit();
 		gbImageLocation.SuspendLayout();
@@ -71,20 +72,22 @@ partial class MainWindow
 		// tlpMain
 		// 
 		tlpMain.ColumnCount = 2;
-		tlpMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70F));
-		tlpMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
+		tlpMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+		tlpMain.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 300F));
 		tlpMain.Controls.Add(pbMain, 0, 0);
 		tlpMain.Controls.Add(gbImageLocation, 1, 0);
 		tlpMain.Controls.Add(gbColors, 1, 2);
 		tlpMain.Controls.Add(gbMode, 1, 7);
 		tlpMain.Controls.Add(gbThreads, 1, 9);
 		tlpMain.Controls.Add(gbThreshold, 1, 12);
-		tlpMain.Controls.Add(btnProcess, 1, 14);
+		tlpMain.Controls.Add(btnProcess, 1, 16);
+		tlpMain.Controls.Add(btnAverage, 1, 15);
 		tlpMain.Dock = DockStyle.Fill;
 		tlpMain.Location = new Point(0, 0);
 		tlpMain.Margin = new Padding(0);
 		tlpMain.Name = "tlpMain";
-		tlpMain.RowCount = 15;
+		tlpMain.Padding = new Padding(5);
+		tlpMain.RowCount = 17;
 		tlpMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
 		tlpMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
 		tlpMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
@@ -99,19 +102,20 @@ partial class MainWindow
 		tlpMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
 		tlpMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
 		tlpMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+		tlpMain.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
 		tlpMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
-		tlpMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-		tlpMain.Size = new Size(834, 451);
+		tlpMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+		tlpMain.Size = new Size(894, 545);
 		tlpMain.TabIndex = 0;
 		// 
 		// pbMain
 		// 
 		pbMain.BackColor = SystemColors.Control;
 		pbMain.Dock = DockStyle.Fill;
-		pbMain.Location = new Point(3, 3);
+		pbMain.Location = new Point(8, 8);
 		pbMain.Name = "pbMain";
-		tlpMain.SetRowSpan(pbMain, 15);
-		pbMain.Size = new Size(577, 445);
+		tlpMain.SetRowSpan(pbMain, 17);
+		pbMain.Size = new Size(578, 529);
 		pbMain.SizeMode = PictureBoxSizeMode.Zoom;
 		pbMain.TabIndex = 2;
 		pbMain.TabStop = false;
@@ -121,10 +125,10 @@ partial class MainWindow
 		// 
 		gbImageLocation.Controls.Add(tlpImageLocation);
 		gbImageLocation.Dock = DockStyle.Fill;
-		gbImageLocation.Location = new Point(586, 3);
+		gbImageLocation.Location = new Point(592, 8);
 		gbImageLocation.Name = "gbImageLocation";
 		tlpMain.SetRowSpan(gbImageLocation, 2);
-		gbImageLocation.Size = new Size(245, 54);
+		gbImageLocation.Size = new Size(294, 54);
 		gbImageLocation.TabIndex = 3;
 		gbImageLocation.TabStop = false;
 		gbImageLocation.Text = "Image location";
@@ -142,7 +146,7 @@ partial class MainWindow
 		tlpImageLocation.Name = "tlpImageLocation";
 		tlpImageLocation.RowCount = 1;
 		tlpImageLocation.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-		tlpImageLocation.Size = new Size(239, 32);
+		tlpImageLocation.Size = new Size(288, 32);
 		tlpImageLocation.TabIndex = 0;
 		// 
 		// tbImageLocation
@@ -151,15 +155,15 @@ partial class MainWindow
 		tbImageLocation.Location = new Point(3, 5);
 		tbImageLocation.Margin = new Padding(3, 5, 3, 3);
 		tbImageLocation.Name = "tbImageLocation";
-		tbImageLocation.Size = new Size(185, 23);
+		tbImageLocation.Size = new Size(224, 23);
 		tbImageLocation.TabIndex = 0;
 		// 
 		// btnBrowse
 		// 
 		btnBrowse.Dock = DockStyle.Fill;
-		btnBrowse.Location = new Point(194, 3);
+		btnBrowse.Location = new Point(233, 3);
 		btnBrowse.Name = "btnBrowse";
-		btnBrowse.Size = new Size(42, 26);
+		btnBrowse.Size = new Size(52, 26);
 		btnBrowse.TabIndex = 1;
 		btnBrowse.Text = "...";
 		btnBrowse.UseVisualStyleBackColor = true;
@@ -169,10 +173,10 @@ partial class MainWindow
 		// 
 		gbColors.Controls.Add(dgvColors);
 		gbColors.Dock = DockStyle.Fill;
-		gbColors.Location = new Point(586, 63);
+		gbColors.Location = new Point(592, 68);
 		gbColors.Name = "gbColors";
 		tlpMain.SetRowSpan(gbColors, 5);
-		gbColors.Size = new Size(245, 144);
+		gbColors.Size = new Size(294, 144);
 		gbColors.TabIndex = 4;
 		gbColors.TabStop = false;
 		gbColors.Text = "Colors";
@@ -190,7 +194,7 @@ partial class MainWindow
 		dgvColors.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
 		dgvColors.RowTemplate.Height = 25;
 		dgvColors.ScrollBars = ScrollBars.Vertical;
-		dgvColors.Size = new Size(239, 122);
+		dgvColors.Size = new Size(288, 122);
 		dgvColors.TabIndex = 0;
 		// 
 		// colRed
@@ -233,10 +237,10 @@ partial class MainWindow
 		// 
 		gbMode.Controls.Add(tlpMode);
 		gbMode.Dock = DockStyle.Fill;
-		gbMode.Location = new Point(586, 213);
+		gbMode.Location = new Point(592, 218);
 		gbMode.Name = "gbMode";
 		tlpMain.SetRowSpan(gbMode, 2);
-		gbMode.Size = new Size(245, 54);
+		gbMode.Size = new Size(294, 54);
 		gbMode.TabIndex = 5;
 		gbMode.TabStop = false;
 		gbMode.Text = "Mode";
@@ -256,7 +260,7 @@ partial class MainWindow
 		tlpMode.RowCount = 1;
 		tlpMode.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
 		tlpMode.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-		tlpMode.Size = new Size(239, 32);
+		tlpMode.Size = new Size(288, 32);
 		tlpMode.TabIndex = 0;
 		// 
 		// rbCS
@@ -266,7 +270,7 @@ partial class MainWindow
 		rbCS.Dock = DockStyle.Fill;
 		rbCS.Location = new Point(3, 3);
 		rbCS.Name = "rbCS";
-		rbCS.Size = new Size(113, 26);
+		rbCS.Size = new Size(138, 26);
 		rbCS.TabIndex = 0;
 		rbCS.TabStop = true;
 		rbCS.Text = "C#";
@@ -276,9 +280,9 @@ partial class MainWindow
 		// 
 		rbAssembly.AutoSize = true;
 		rbAssembly.Dock = DockStyle.Fill;
-		rbAssembly.Location = new Point(122, 3);
+		rbAssembly.Location = new Point(147, 3);
 		rbAssembly.Name = "rbAssembly";
-		rbAssembly.Size = new Size(114, 26);
+		rbAssembly.Size = new Size(138, 26);
 		rbAssembly.TabIndex = 1;
 		rbAssembly.Text = "Assembly";
 		rbAssembly.UseVisualStyleBackColor = true;
@@ -287,10 +291,10 @@ partial class MainWindow
 		// 
 		gbThreads.Controls.Add(tlpThreads);
 		gbThreads.Dock = DockStyle.Fill;
-		gbThreads.Location = new Point(586, 273);
+		gbThreads.Location = new Point(592, 278);
 		gbThreads.Name = "gbThreads";
 		tlpMain.SetRowSpan(gbThreads, 3);
-		gbThreads.Size = new Size(245, 84);
+		gbThreads.Size = new Size(294, 84);
 		gbThreads.TabIndex = 6;
 		gbThreads.TabStop = false;
 		gbThreads.Text = "Threads";
@@ -310,7 +314,7 @@ partial class MainWindow
 		tlpThreads.RowCount = 2;
 		tlpThreads.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
 		tlpThreads.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-		tlpThreads.Size = new Size(239, 62);
+		tlpThreads.Size = new Size(288, 62);
 		tlpThreads.TabIndex = 0;
 		// 
 		// rbAuto
@@ -320,7 +324,7 @@ partial class MainWindow
 		rbAuto.Dock = DockStyle.Fill;
 		rbAuto.Location = new Point(3, 3);
 		rbAuto.Name = "rbAuto";
-		rbAuto.Size = new Size(113, 25);
+		rbAuto.Size = new Size(138, 25);
 		rbAuto.TabIndex = 0;
 		rbAuto.TabStop = true;
 		rbAuto.Text = "Auto";
@@ -331,9 +335,9 @@ partial class MainWindow
 		// 
 		rbCustom.AutoSize = true;
 		rbCustom.Dock = DockStyle.Fill;
-		rbCustom.Location = new Point(122, 3);
+		rbCustom.Location = new Point(147, 3);
 		rbCustom.Name = "rbCustom";
-		rbCustom.Size = new Size(114, 25);
+		rbCustom.Size = new Size(138, 25);
 		rbCustom.TabIndex = 1;
 		rbCustom.Text = "Custom";
 		rbCustom.UseVisualStyleBackColor = true;
@@ -348,7 +352,7 @@ partial class MainWindow
 		tbThreads.Margin = new Padding(3, 3, 40, 3);
 		tbThreads.Name = "tbThreads";
 		tbThreads.PlaceholderText = "Enter thread count";
-		tbThreads.Size = new Size(196, 23);
+		tbThreads.Size = new Size(245, 23);
 		tbThreads.TabIndex = 2;
 		tbThreads.Validating += TbThreads_Validating;
 		// 
@@ -357,10 +361,10 @@ partial class MainWindow
 		gbThreshold.BackColor = SystemColors.Control;
 		gbThreshold.Controls.Add(tlpThreshold);
 		gbThreshold.Dock = DockStyle.Fill;
-		gbThreshold.Location = new Point(586, 363);
+		gbThreshold.Location = new Point(592, 368);
 		gbThreshold.Name = "gbThreshold";
 		tlpMain.SetRowSpan(gbThreshold, 2);
-		gbThreshold.Size = new Size(245, 54);
+		gbThreshold.Size = new Size(294, 54);
 		gbThreshold.TabIndex = 7;
 		gbThreshold.TabStop = false;
 		gbThreshold.Text = "Threshold";
@@ -377,7 +381,7 @@ partial class MainWindow
 		tlpThreshold.RowCount = 1;
 		tlpThreshold.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
 		tlpThreshold.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-		tlpThreshold.Size = new Size(239, 32);
+		tlpThreshold.Size = new Size(288, 32);
 		tlpThreshold.TabIndex = 0;
 		// 
 		// tbThreshold
@@ -388,7 +392,7 @@ partial class MainWindow
 		tbThreshold.MaxLength = 3;
 		tbThreshold.Name = "tbThreshold";
 		tbThreshold.PlaceholderText = "Enter threshold";
-		tbThreshold.Size = new Size(196, 23);
+		tbThreshold.Size = new Size(245, 23);
 		tbThreshold.TabIndex = 1;
 		tbThreshold.Text = "0";
 		tbThreshold.Validating += TbThreshold_Validating;
@@ -396,22 +400,31 @@ partial class MainWindow
 		// btnProcess
 		// 
 		btnProcess.Dock = DockStyle.Fill;
-		btnProcess.Location = new Point(586, 423);
+		btnProcess.Location = new Point(592, 513);
 		btnProcess.Name = "btnProcess";
-		btnProcess.Size = new Size(245, 25);
+		btnProcess.Size = new Size(294, 24);
 		btnProcess.TabIndex = 8;
 		btnProcess.Text = "Process";
 		btnProcess.UseVisualStyleBackColor = true;
 		btnProcess.Click += BtnProcess_Click;
 		// 
+		// btnAverage
+		// 
+		btnAverage.Dock = DockStyle.Fill;
+		btnAverage.Location = new Point(592, 483);
+		btnAverage.Name = "btnAverage";
+		btnAverage.Size = new Size(294, 24);
+		btnAverage.TabIndex = 9;
+		btnAverage.Text = "Average";
+		btnAverage.UseVisualStyleBackColor = true;
+		btnAverage.Click += BtnAverage_Click;
+		// 
 		// MainWindow
 		// 
 		AutoScaleDimensions = new SizeF(7F, 15F);
 		AutoScaleMode = AutoScaleMode.Font;
-		ClientSize = new Size(834, 451);
+		ClientSize = new Size(894, 545);
 		Controls.Add(tlpMain);
-		MaximumSize = new Size(850, 490);
-		MinimumSize = new Size(850, 490);
 		Name = "MainWindow";
 		Text = "ColorPop";
 		tlpMain.ResumeLayout(false);
@@ -460,4 +473,5 @@ partial class MainWindow
 	private DataGridViewImageColumn colColorPreview;
 	private TableLayoutPanel tlpThreshold;
 	private TextBox tbThreshold;
+	private Button btnAverage;
 }
