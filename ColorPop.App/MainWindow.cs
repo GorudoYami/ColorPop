@@ -13,13 +13,15 @@ public partial class MainWindow : Form
 {
 	private readonly BindingList<ColorViewModel> _colors;
 	private readonly BindingSource _bindingSource;
-	private readonly ErrorProvider _errorProvider;
+	private readonly ErrorProvider _threadsErrorProvider;
+	private readonly ErrorProvider _thresholdErrorProvider;
 
 	public MainWindow()
 	{
 		_colors = new BindingList<ColorViewModel>();
 		_bindingSource = new BindingSource(_colors, null);
-		_errorProvider = new ErrorProvider();
+		_threadsErrorProvider = new ErrorProvider(this);
+		_thresholdErrorProvider = new ErrorProvider(this);
 
 		InitializeComponent();
 		InitializeGridView();
@@ -230,16 +232,24 @@ public partial class MainWindow : Form
 		if (byte.TryParse(tbThreshold.Text, out _) == false)
 		{
 			e.Cancel = true;
-			_errorProvider.SetError(tbThreshold, "Please enter a valid number 0-255");
+			_thresholdErrorProvider.SetError(tbThreshold, "Please enter a valid number 0-255");
+		}
+		else
+		{
+			_thresholdErrorProvider.Clear();
 		}
 	}
 
 	private void TbThreads_Validating(object sender, CancelEventArgs e)
 	{
-		if (int.TryParse(tbThreads.Text, out int threads) || threads < 1)
+		if (int.TryParse(tbThreads.Text, out int threads) == false || threads < 1)
 		{
 			e.Cancel = true;
-			_errorProvider.SetError(tbThreads, "Please enter a valid number bigger than 0");
+			_threadsErrorProvider.SetError(tbThreads, "Please enter a valid number bigger than 0");
+		}
+		else
+		{
+			_threadsErrorProvider.Clear();
 		}
 	}
 }

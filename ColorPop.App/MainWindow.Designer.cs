@@ -51,6 +51,7 @@ partial class MainWindow
 		rbCustom = new RadioButton();
 		tbThreads = new TextBox();
 		gbThreshold = new GroupBox();
+		tlpThreshold = new TableLayoutPanel();
 		tbThreshold = new TextBox();
 		btnProcess = new Button();
 		tlpMain.SuspendLayout();
@@ -64,6 +65,7 @@ partial class MainWindow
 		gbThreads.SuspendLayout();
 		tlpThreads.SuspendLayout();
 		gbThreshold.SuspendLayout();
+		tlpThreshold.SuspendLayout();
 		SuspendLayout();
 		// 
 		// tlpMain
@@ -343,16 +345,17 @@ partial class MainWindow
 		tbThreads.Dock = DockStyle.Fill;
 		tbThreads.Enabled = false;
 		tbThreads.Location = new Point(3, 34);
+		tbThreads.Margin = new Padding(3, 3, 40, 3);
 		tbThreads.Name = "tbThreads";
 		tbThreads.PlaceholderText = "Enter thread count";
-		tbThreads.Size = new Size(233, 23);
+		tbThreads.Size = new Size(196, 23);
 		tbThreads.TabIndex = 2;
 		tbThreads.Validating += TbThreads_Validating;
 		// 
 		// gbThreshold
 		// 
 		gbThreshold.BackColor = SystemColors.Control;
-		gbThreshold.Controls.Add(tbThreshold);
+		gbThreshold.Controls.Add(tlpThreshold);
 		gbThreshold.Dock = DockStyle.Fill;
 		gbThreshold.Location = new Point(586, 363);
 		gbThreshold.Name = "gbThreshold";
@@ -362,15 +365,31 @@ partial class MainWindow
 		gbThreshold.TabStop = false;
 		gbThreshold.Text = "Threshold";
 		// 
+		// tlpThreshold
+		// 
+		tlpThreshold.ColumnCount = 1;
+		tlpThreshold.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+		tlpThreshold.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+		tlpThreshold.Controls.Add(tbThreshold, 0, 0);
+		tlpThreshold.Dock = DockStyle.Fill;
+		tlpThreshold.Location = new Point(3, 19);
+		tlpThreshold.Name = "tlpThreshold";
+		tlpThreshold.RowCount = 1;
+		tlpThreshold.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+		tlpThreshold.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+		tlpThreshold.Size = new Size(239, 32);
+		tlpThreshold.TabIndex = 0;
+		// 
 		// tbThreshold
 		// 
 		tbThreshold.Dock = DockStyle.Fill;
-		tbThreshold.Location = new Point(3, 19);
+		tbThreshold.Location = new Point(3, 3);
+		tbThreshold.Margin = new Padding(3, 3, 40, 3);
 		tbThreshold.MaxLength = 3;
 		tbThreshold.Name = "tbThreshold";
 		tbThreshold.PlaceholderText = "Enter threshold";
-		tbThreshold.Size = new Size(239, 23);
-		tbThreshold.TabIndex = 0;
+		tbThreshold.Size = new Size(196, 23);
+		tbThreshold.TabIndex = 1;
 		tbThreshold.Text = "0";
 		tbThreshold.Validating += TbThreshold_Validating;
 		// 
@@ -409,7 +428,8 @@ partial class MainWindow
 		tlpThreads.ResumeLayout(false);
 		tlpThreads.PerformLayout();
 		gbThreshold.ResumeLayout(false);
-		gbThreshold.PerformLayout();
+		tlpThreshold.ResumeLayout(false);
+		tlpThreshold.PerformLayout();
 		ResumeLayout(false);
 	}
 
@@ -434,9 +454,10 @@ partial class MainWindow
 	private RadioButton rbAuto;
 	private RadioButton rbCustom;
 	private TextBox tbThreads;
-	private TextBox tbThreshold;
 	private DataGridViewTextBoxColumn colRed;
 	private DataGridViewTextBoxColumn colGreen;
 	private DataGridViewTextBoxColumn colBlue;
 	private DataGridViewImageColumn colColorPreview;
+	private TableLayoutPanel tlpThreshold;
+	private TextBox tbThreshold;
 }
