@@ -23,6 +23,13 @@ public partial class ResultDialog : Form
 
 	private void BtnSave_Click(object sender, EventArgs e)
 	{
+		using var dialog = new SaveFileDialog();
+		dialog.Filter = "Image Files (*.png, *.jpg, *.jpeg, *.bmp)|*.png;*.jpg;*.jpeg;*.bmp";
+		DialogResult result = dialog.ShowDialog(this);
 
+		if (result == DialogResult.OK)
+		{
+			pbMain.Image.Save(dialog.FileName);
+		}
 	}
 }

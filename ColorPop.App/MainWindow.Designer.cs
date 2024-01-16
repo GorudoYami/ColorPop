@@ -146,7 +146,8 @@ partial class MainWindow
 		// tbImageLocation
 		// 
 		tbImageLocation.Dock = DockStyle.Fill;
-		tbImageLocation.Location = new Point(3, 3);
+		tbImageLocation.Location = new Point(3, 5);
+		tbImageLocation.Margin = new Padding(3, 5, 3, 3);
 		tbImageLocation.Name = "tbImageLocation";
 		tbImageLocation.Size = new Size(185, 23);
 		tbImageLocation.TabIndex = 0;
@@ -322,6 +323,7 @@ partial class MainWindow
 		rbAuto.TabStop = true;
 		rbAuto.Text = "Auto";
 		rbAuto.UseVisualStyleBackColor = true;
+		rbAuto.CheckedChanged += RbAuto_CheckedChanged;
 		// 
 		// rbCustom
 		// 
@@ -333,6 +335,7 @@ partial class MainWindow
 		rbCustom.TabIndex = 1;
 		rbCustom.Text = "Custom";
 		rbCustom.UseVisualStyleBackColor = true;
+		rbCustom.CheckedChanged += RbCustom_CheckedChanged;
 		// 
 		// tbThreads
 		// 
@@ -344,6 +347,7 @@ partial class MainWindow
 		tbThreads.PlaceholderText = "Enter thread count";
 		tbThreads.Size = new Size(233, 23);
 		tbThreads.TabIndex = 2;
+		tbThreads.Validating += TbThreads_Validating;
 		// 
 		// gbThreshold
 		// 
@@ -362,11 +366,13 @@ partial class MainWindow
 		// 
 		tbThreshold.Dock = DockStyle.Fill;
 		tbThreshold.Location = new Point(3, 19);
+		tbThreshold.MaxLength = 3;
 		tbThreshold.Name = "tbThreshold";
 		tbThreshold.PlaceholderText = "Enter threshold";
 		tbThreshold.Size = new Size(239, 23);
 		tbThreshold.TabIndex = 0;
 		tbThreshold.Text = "0";
+		tbThreshold.Validating += TbThreshold_Validating;
 		// 
 		// btnProcess
 		// 

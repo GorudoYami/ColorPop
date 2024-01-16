@@ -8,7 +8,7 @@ namespace ColorPop.Processor;
 [SupportedOSPlatform("Windows6.1")]
 public class ColorPopProcessor : ColorPopProcessorBase
 {
-	public ColorPopProcessor(byte[] originalBitmapData, IEnumerable<Color> colors, int threshold, int threadCount)
+	public ColorPopProcessor(byte[] originalBitmapData, IEnumerable<Color> colors, byte threshold, int threadCount)
 		: base(originalBitmapData, colors, threshold, threadCount)
 	{
 	}

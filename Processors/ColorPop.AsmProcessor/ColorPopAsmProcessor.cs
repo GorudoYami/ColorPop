@@ -6,7 +6,7 @@ namespace ColorPop.AsmProcessor;
 
 public class ColorPopAsmProcessor : ColorPopProcessorBase
 {
-	public ColorPopAsmProcessor(byte[] originalBitmapData, IEnumerable<Color> colors, int threshold, int threadCount)
+	public ColorPopAsmProcessor(byte[] originalBitmapData, IEnumerable<Color> colors, byte threshold, int threadCount)
 		: base(originalBitmapData, colors, threshold, threadCount)
 	{
 	}

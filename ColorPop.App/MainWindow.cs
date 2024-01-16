@@ -13,11 +13,13 @@ public partial class MainWindow : Form
 {
 	private readonly BindingList<ColorViewModel> _colors;
 	private readonly BindingSource _bindingSource;
+	private readonly ErrorProvider _errorProvider;
 
 	public MainWindow()
 	{
 		_colors = new BindingList<ColorViewModel>();
 		_bindingSource = new BindingSource(_colors, null);
+		_errorProvider = new ErrorProvider();
 
 		InitializeComponent();
 		InitializeGridView();
@@ -47,10 +49,10 @@ public partial class MainWindow : Form
 			Title = "Select an image"
 		};
 
-		dialog.ShowDialog(this);
+		DialogResult result = dialog.ShowDialog(this);
 		tbImageLocation.Text = dialog.FileName;
 
-		if (!ValidateFile())
+		if (result != DialogResult.OK || !ValidateFile())
 		{
 			return;
 		}
@@ -84,7 +86,7 @@ public partial class MainWindow : Form
 	{
 		byte[] bitmapData = GetBitmapData();
 		IEnumerable<Color> colors = GetColors();
-		int threshold = GetThreshold();
+		byte threshold = GetThreshold();
 		int threadCount = GetThreadCount();
 
 		var processor = ResolveProcessor(bitmapData, colors, threshold, threadCount);
@@ -123,9 +125,9 @@ public partial class MainWindow : Form
 		return _colors.ToList().Select(x => x.Color);
 	}
 
-	private int GetThreshold()
+	private byte GetThreshold()
 	{
-		return int.Parse(tbThreshold.Text);
+		return byte.Parse(tbThreshold.Text);
 	}
 
 	private int GetThreadCount()
@@ -133,7 +135,7 @@ public partial class MainWindow : Form
 		return int.Parse(tbThreads.Text);
 	}
 
-	private IColorPopProcessor ResolveProcessor(byte[] bitmapData, IEnumerable<Color> colors, int threshold, int threadCount)
+	private IColorPopProcessor ResolveProcessor(byte[] bitmapData, IEnumerable<Color> colors, byte threshold, int threadCount)
 	{
 		return rbAssembly.Checked
 			? new ColorPopAsmProcessor(bitmapData, colors, threshold, threadCount)
@@ -148,6 +150,11 @@ public partial class MainWindow : Form
 
 	private void PbMain_MouseClick(object sender, MouseEventArgs e)
 	{
+		if (pbMain.Image == null)
+		{
+			return;
+		}
+
 		Color color = GetColorFromImage(e.Location);
 		_colors.Add(new ColorViewModel(color));
 	}
@@ -199,5 +206,40 @@ public partial class MainWindow : Form
 		}
 
 		return result;
+	}
+
+	private void RbCustom_CheckedChanged(object sender, EventArgs e)
+	{
+		if (rbCustom.Checked)
+		{
+			tbThreads.Enabled = true;
+		}
+	}
+
+	private void RbAuto_CheckedChanged(object sender, EventArgs e)
+	{
+		if (rbAuto.Checked)
+		{
+			tbThreads.Enabled = false;
+			tbThreads.Text = Environment.ProcessorCount.ToString();
+		}
+	}
+
+	private void TbThreshold_Validating(object sender, CancelEventArgs e)
+	{
+		if (byte.TryParse(tbThreshold.Text, out _) == false)
+		{
+			e.Cancel = true;
+			_errorProvider.SetError(tbThreshold, "Please enter a valid number 0-255");
+		}
+	}
+
+	private void TbThreads_Validating(object sender, CancelEventArgs e)
+	{
+		if (int.TryParse(tbThreads.Text, out int threads) || threads < 1)
+		{
+			e.Cancel = true;
+			_errorProvider.SetError(tbThreads, "Please enter a valid number bigger than 0");
+		}
 	}
 }
