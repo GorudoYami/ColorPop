@@ -389,7 +389,6 @@ partial class MainWindow
 		tbThreshold.Dock = DockStyle.Fill;
 		tbThreshold.Location = new Point(3, 3);
 		tbThreshold.Margin = new Padding(3, 3, 40, 3);
-		tbThreshold.MaxLength = 3;
 		tbThreshold.Name = "tbThreshold";
 		tbThreshold.PlaceholderText = "Enter threshold";
 		tbThreshold.Size = new Size(245, 23);

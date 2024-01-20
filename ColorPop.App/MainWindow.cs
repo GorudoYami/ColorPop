@@ -94,7 +94,7 @@ public partial class MainWindow : Form
 
 		byte[] bitmapData = GetBitmapData();
 		IEnumerable<Color> colors = GetColors();
-		byte threshold = GetThreshold();
+		int threshold = GetThreshold();
 		int threadCount = GetThreadCount();
 
 		var processor = ResolveProcessor(bitmapData, colors, threshold, threadCount);
@@ -133,9 +133,9 @@ public partial class MainWindow : Form
 		return _colors.ToList().Select(x => x.Color);
 	}
 
-	private byte GetThreshold()
+	private int GetThreshold()
 	{
-		return byte.Parse(tbThreshold.Text);
+		return int.Parse(tbThreshold.Text);
 	}
 
 	private int GetThreadCount()
@@ -143,7 +143,7 @@ public partial class MainWindow : Form
 		return int.Parse(tbThreads.Text);
 	}
 
-	private IColorPopProcessor ResolveProcessor(byte[] bitmapData, IEnumerable<Color> colors, byte threshold, int threadCount)
+	private IColorPopProcessor ResolveProcessor(byte[] bitmapData, IEnumerable<Color> colors, int threshold, int threadCount)
 	{
 		return rbAssembly.Checked
 			? new ColorPopAsmProcessor(bitmapData, colors, threshold, threadCount)
@@ -235,10 +235,10 @@ public partial class MainWindow : Form
 
 	private void TbThreshold_Validating(object sender, CancelEventArgs e)
 	{
-		if (byte.TryParse(tbThreshold.Text, out _) == false)
+		if (int.TryParse(tbThreshold.Text, out _) == false)
 		{
 			e.Cancel = true;
-			_thresholdErrorProvider.SetError(tbThreshold, "Please enter a valid number 0-255");
+			_thresholdErrorProvider.SetError(tbThreshold, "Please enter a valid number");
 		}
 		else
 		{
@@ -267,7 +267,7 @@ public partial class MainWindow : Form
 		}
 
 		IEnumerable<Color> colors = GetColors();
-		byte threshold = GetThreshold();
+		int threshold = GetThreshold();
 		int threadCount = GetThreadCount();
 
 		var times = new List<long>();

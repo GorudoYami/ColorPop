@@ -11,7 +11,6 @@
 ; r13 - End of target colors array
 
 .data
-; This is probably bad cause the processed image is weird
 weights db 38, 75, 15, 0, 38, 75, 15, 0, 38, 75, 15, 0, 38, 75, 15, 0
 shuffle_mask db 0, 0, 0, 0, 4, 4, 4, 4, 8, 8, 8, 8, 12, 12, 12, 12
 
@@ -32,11 +31,16 @@ ProcessChunk PROC
 	add rax, r9
 	mov r13, rax
 
+	; Broadcast threshold value and square
+	movd xmm0, r8d
+	vpbroadcastd zmm13, xmm0
+	vpmulld zmm13, zmm13, zmm13
+
 	; Initialize xmm7 with the weights for the R, G, and B channels
-	movdqa xmm7, XMMWORD PTR [weights]
+	movdqa xmm14, XMMWORD PTR [weights]
 
 	; Initialize xmm8 with the shuffle mask
-	movdqa xmm8, XMMWORD PTR [shuffle_mask]
+	movdqa xmm15, XMMWORD PTR [shuffle_mask]
 
 _big_loop:
 	mov r12, r9								; Load colors array pointer into r12
@@ -53,34 +57,41 @@ _big_color_loop:
 	jz _big_color_loop_end					; If yes, then jump to the end of this loop
 
 	vpbroadcastd ymm1, DWORD PTR [r12]		; Spread color bytes to the whole register
-	vpmaxub ymm2, ymm0, ymm1				; Get max color bytes
-	vpminub ymm3, ymm0, ymm1				; Get min color bytes
-	vpsubb ymm4, ymm2, ymm3					; Subtract color bytes from bitmap data
+	vpsubb ymm2, ymm0, ymm1					; Subtract color bytes from bitmap data
+	vpabsb ymm2, ymm2						; Take absolute value of the result
 
-	movzx eax, r8b							; Load threshold into eax
-	movd xmm5, eax							; Load threshold into xmm5
-	vpbroadcastb ymm5, xmm5					; Spread threshold to the whole register
-	vpcmpub k1, ymm4, ymm5, 1				; Compare threshold and absolute result
+	vpmovzxbw zmm2, ymm2					; Move the result to bigger register
+	vpmullw zmm2, zmm2, zmm2				; Square the result
+
+	; Add the squared bytes together
+	VPSHUFD zmm3, zmm2, 10110001b
+	VPADDD zmm4, zmm2, zmm3
+
+	VPSHUFD zmm3, zmm2, 11001100b
+	VPADDD zmm5, zmm2, zmm3
+
+	; Compare the sum of squares with the threshold
+	vpcmpud k1, zmm5, zmm13, 5
 
 	; Calculate luminosity for each pixel
 
-	; TODO Fix this
 	; Lower half
-	vextracti128 xmm6, ymm0, 0				; Extract lower 128 bits (4 pixels) from ymm0
-	vpmaddubsw xmm6, xmm6, xmm7				; Multiply each pixel by luminosity coefficients
-	vpsrlw xmm6, xmm6, 8					; Shift right to divide by 256
-	vpshufb xmm6, xmm6, xmm8				; Shuffle bytes to replicate luminosity
-	vinserti128 ymm6, ymm6, xmm6, 1			; Insert lower 128 bits into upper 128 bits
+	vextracti128 xmm1, ymm0, 0				; Extract lower 128 bits (4 pixels)
+	vpmaddubsw xmm1, xmm1, xmm14			; Multiply each pixel by luminosity coefficients
+	vpsrlw xmm1, xmm1, 8					; Shift right to divide by 256
+	vpshufb xmm1, xmm1, xmm15				; Shuffle bytes to replicate luminosity
 
 	; Upper half
-	vextracti128 xmm6, ymm0, 1				; Extract upper 128 bits (4 pixels) from ymm0
-	vpmaddubsw xmm6, xmm6, xmm7				; Multiply each pixel by luminosity coefficients
-	vpsrlw xmm6, xmm6, 8					; Shift right to divide by 256
-	vpshufb xmm6, xmm6, xmm8				; Shuffle bytes to replicate luminosity
-	vinserti128 ymm6, ymm6, xmm6, 0			; Insert upper 128 bits into lower 128 bits
+	vextracti128 xmm2, ymm0, 1				; Extract upper 128 bits (4 pixels)
+	vpmaddubsw xmm2, xmm2, xmm14			; Multiply each pixel by luminosity coefficients
+	vpsrlw xmm2, xmm2, 8					; Shift right to divide by 256
+	vpshufb xmm2, xmm2, xmm15				; Shuffle bytes to replicate luminosity
+
+	vinserti128 ymm0, ymm1, xmm2, 1			; Insert result
 
 	; Write luminosity to memory
-	vmovdqu32 YMMWORD PTR [r10] {k1}, ymm6	; Store luminosity to memory
+
+	vmovdqu32 YMMWORD PTR [r10] {k1}, ymm0	; Store new pixels to memory
 
 	add r12, 4								; Increment bitmap data array pointer
 	jmp _big_color_loop						; Jump to the beginning of big color loop

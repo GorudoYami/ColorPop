@@ -8,7 +8,7 @@ namespace ColorPop.Processor;
 [SupportedOSPlatform("Windows6.1")]
 public class ColorPopProcessor : ColorPopProcessorBase
 {
-	public ColorPopProcessor(byte[] originalBitmapData, IEnumerable<Color> colors, byte threshold, int threadCount)
+	public ColorPopProcessor(byte[] originalBitmapData, IEnumerable<Color> colors, int threshold, int threadCount)
 		: base(originalBitmapData, colors, threshold, threadCount)
 	{
 	}
@@ -47,10 +47,13 @@ public class ColorPopProcessor : ColorPopProcessorBase
 
 	private bool AreColorsMatching(Pixel originalPixel, Color targetColor)
 	{
-		int deltaR = Math.Abs(originalPixel.Red - targetColor.R);
-		int deltaG = Math.Abs(originalPixel.Green - targetColor.G);
-		int deltaB = Math.Abs(originalPixel.Blue - targetColor.B);
+		double difference = Math.Sqrt
+		(
+			Math.Pow(originalPixel.Red - targetColor.R, 2) +
+			Math.Pow(originalPixel.Green - targetColor.G, 2) +
+			Math.Pow(originalPixel.Blue - targetColor.B, 2)
+		);
 
-		return deltaR <= _threshold && deltaG <= _threshold && deltaB <= _threshold;
+		return difference <= _threshold;
 	}
 }

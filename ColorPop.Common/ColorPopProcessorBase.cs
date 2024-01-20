@@ -12,10 +12,10 @@ public abstract class ColorPopProcessorBase : IColorPopProcessor
 	protected readonly double _greenFactor;
 	protected readonly double _blueFactor;
 	protected IEnumerable<Color> _colors;
-	protected byte _threshold;
+	protected int _threshold;
 	protected int _threadCount;
 
-	public ColorPopProcessorBase(byte[] originalBitmapData, IEnumerable<Color> colors, byte threshold, int threadCount)
+	public ColorPopProcessorBase(byte[] originalBitmapData, IEnumerable<Color> colors, int threshold, int threadCount)
 	{
 		_bitmapData = originalBitmapData;
 		_colors = colors;
