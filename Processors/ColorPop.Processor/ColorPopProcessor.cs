@@ -47,13 +47,11 @@ public class ColorPopProcessor : ColorPopProcessorBase
 
 	private bool AreColorsMatching(Pixel originalPixel, Color targetColor)
 	{
-		double difference = Math.Sqrt
-		(
+		double difference =
 			Math.Pow(originalPixel.Red - targetColor.R, 2) +
 			Math.Pow(originalPixel.Green - targetColor.G, 2) +
-			Math.Pow(originalPixel.Blue - targetColor.B, 2)
-		);
+			Math.Pow(originalPixel.Blue - targetColor.B, 2);
 
-		return difference <= _threshold;
+		return difference <= Math.Pow(_threshold, 2);
 	}
 }

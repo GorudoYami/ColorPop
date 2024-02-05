@@ -5,6 +5,7 @@
 ; r9 - Target colors array pointer
 ; [rsp + 28h] - Target colors array length
 ; [rsp + 30h] - Bitmap data array pointer
+;
 ; r10 - Enumerator of bitmap data array
 ; r11 - End of bitmap data array
 ; r12 - Enumerator of target colors array
@@ -63,12 +64,16 @@ _big_color_loop:
 	vpmovzxbw zmm2, ymm2					; Move the result to bigger register
 	vpmullw zmm2, zmm2, zmm2				; Square the result
 
-	; Add the squared bytes together
-	VPSHUFD zmm3, zmm2, 10110001b
-	VPADDD zmm4, zmm2, zmm3
-
-	VPSHUFD zmm3, zmm2, 11001100b
-	VPADDD zmm5, zmm2, zmm3
+	; Sum the differences for each pixel
+	vpaddd zmm2, zmm2, zmm2
+	vextracti64x4 ymm3, zmm2, 1
+	vpaddd ymm2, ymm2, ymm3
+	vextracti128 xmm3, ymm2, 1
+	vpaddd xmm2, xmm2, xmm3
+	vpshufd xmm2, xmm2, 1Eh
+	vpblendd xmm5, xmm5, xmm2, 03h
+	vinserti128 ymm5, ymm5, xmm5, 1
+	vinserti64x4 zmm5, zmm5, ymm5, 1
 
 	; Compare the sum of squares with the threshold
 	vpcmpud k1, zmm5, zmm13, 5
@@ -93,7 +98,7 @@ _big_color_loop:
 
 	vmovdqu32 YMMWORD PTR [r10] {k1}, ymm0	; Store new pixels to memory
 
-	add r12, 4								; Increment bitmap data array pointer
+	add r12, 4								
 	jmp _big_color_loop						; Jump to the beginning of big color loop
 
 _big_color_loop_end:
