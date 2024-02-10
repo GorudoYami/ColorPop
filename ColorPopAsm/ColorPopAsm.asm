@@ -12,6 +12,8 @@
 ; r13 - End of target colors array
 
 .data
+indicies_d dd 0, 9, 2, 11, 4, 13, 6, 15, 8, 1, 10, 3, 12, 5, 14, 7
+indicies_q dq 0, 4, 2, 6, 1, 5, 3, 7
 weights db 38, 75, 15, 0, 38, 75, 15, 0, 38, 75, 15, 0, 38, 75, 15, 0
 shuffle_mask db 0, 0, 0, 0, 4, 4, 4, 4, 8, 8, 8, 8, 12, 12, 12, 12
 
@@ -32,10 +34,16 @@ ProcessChunk PROC
 	add rax, r9
 	mov r13, rax
 
+	; Load indicies_d into zmm11
+	vmovdqa32 zmm11, DWORD PTR [indicies_d]
+
+	; Load indicies_q into zmm12
+	vmovdqa64 zmm12, QWORD PTR [indicies_q]
+
 	; Broadcast threshold value and square
 	movd xmm0, r8d
-	vpbroadcastd zmm13, xmm0
-	vpmulld zmm13, zmm13, zmm13
+	vpbroadcastd ymm13, xmm0
+	vpmulld ymm13, ymm13, ymm13
 
 	; Initialize xmm7 with the weights for the R, G, and B channels
 	movdqa xmm14, XMMWORD PTR [weights]
@@ -58,25 +66,30 @@ _big_color_loop:
 	jz _big_color_loop_end					; If yes, then jump to the end of this loop
 
 	vpbroadcastd ymm1, DWORD PTR [r12]		; Spread color bytes to the whole register
-	vpsubb ymm2, ymm0, ymm1					; Subtract color bytes from bitmap data
-	vpabsb ymm2, ymm2						; Take absolute value of the result
+
+	; Calculate the difference between the colors
+	vpsubusb ymm2, ymm0, ymm1
+	vpsubusb ymm3, ymm1, ymm0
+	vpmaxub ymm2, ymm2, ymm3
 
 	vpmovzxbw zmm2, ymm2					; Move the result to bigger register
 	vpmullw zmm2, zmm2, zmm2				; Square the result
 
 	; Sum the differences for each pixel
-	vpaddd zmm2, zmm2, zmm2
+	vpermd zmm2, zmm11, zmm2				; Permutate the pixel bytes into lower and upper halves
 	vextracti64x4 ymm3, zmm2, 1
-	vpaddd ymm2, ymm2, ymm3
-	vextracti128 xmm3, ymm2, 1
-	vpaddd xmm2, xmm2, xmm3
-	vpshufd xmm2, xmm2, 1Eh
-	vpblendd xmm5, xmm5, xmm2, 03h
-	vinserti128 ymm5, ymm5, xmm5, 1
-	vinserti64x4 zmm5, zmm5, ymm5, 1
+	vpmovzxwd zmm3, ymm3
+	vextracti64x4 ymm4, zmm2, 0
+	vpmovzxwd zmm4, ymm4
+	vpaddd zmm2, zmm3, zmm4
+
+	vpermq zmm2, zmm12, zmm2
+	vextracti64x4 ymm3, zmm2, 1
+	vextracti64x4 ymm4, zmm2, 0
+	vpaddd ymm2, ymm3, ymm4
 
 	; Compare the sum of squares with the threshold
-	vpcmpud k1, zmm5, zmm13, 5
+	vpcmpgtd k1, ymm2, ymm13
 
 	; Calculate luminosity for each pixel
 
@@ -95,8 +108,7 @@ _big_color_loop:
 	vinserti128 ymm0, ymm1, xmm2, 1			; Insert result
 
 	; Write luminosity to memory
-
-	vmovdqu32 YMMWORD PTR [r10] {k1}, ymm0	; Store new pixels to memory
+	vmovdqu32 DWORD PTR [r10] {k1}, ymm0
 
 	add r12, 4								
 	jmp _big_color_loop						; Jump to the beginning of big color loop
