@@ -14,12 +14,14 @@ public class ColorPopAsmProcessor : ColorPopProcessorBase
 	[DllImport(@"ColorPopAsm.dll")]
 	private static extern void ProcessChunk(int startIndex, int endIndex, int threshold, byte[] targetColors, int targetColorsLength, byte[] bitmapData);
 
-	[DllImport(@"ColorPopAsm.dll")]
-	private static extern void TestProcedure(int a, int b, int c, int d, int e, int f);
-
 	protected override void ProcessChunk(int startIndex, int endIndex)
 	{
 		byte[] targetColors = _colors.SelectMany(c => new byte[] { c.B, c.G, c.R, 255 }).ToArray();
-		ProcessChunk(startIndex, endIndex, _threshold, targetColors, _colors.Count() * 4, _bitmapData);
+		ProcessChunk(startIndex, endIndex, _threshold, targetColors, targetColors.Length, _bitmapData);
+	}
+
+	public static string GetAddress(byte[] array)
+	{
+		return Marshal.UnsafeAddrOfPinnedArrayElement(array, 0).ToString();
 	}
 }

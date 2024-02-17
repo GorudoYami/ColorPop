@@ -13,21 +13,22 @@ public class ColorPopProcessor : ColorPopProcessorBase
 	{
 	}
 
+	// Kolejnosc pikseli "odwrotna" niz w asm :)
 	protected override void ProcessChunk(int startIndex, int endIndex)
 	{
-		for (int index = startIndex; index + 4 < endIndex; index += 4)
+		for (int index = startIndex; index + 4 <= endIndex; index += 4)
 		{
 			var pixel = new Pixel(
-				_bitmapData[index],
+				_bitmapData[index + 2],
 				_bitmapData[index + 1],
-				_bitmapData[index + 2]
+				_bitmapData[index]
 			);
 
 			ProcessPixel(pixel);
 
-			_bitmapData[index] = pixel.Red;
+			_bitmapData[index + 2] = pixel.Red;
 			_bitmapData[index + 1] = pixel.Green;
-			_bitmapData[index + 2] = pixel.Blue;
+			_bitmapData[index] = pixel.Blue;
 		}
 	}
 
@@ -38,20 +39,21 @@ public class ColorPopProcessor : ColorPopProcessorBase
 			return;
 		}
 
-		int luminance = (int)(_redFactor * pixel.Red + _greenFactor * pixel.Green + _blueFactor * pixel.Blue);
+		byte luminance = (byte)((_redFactor * pixel.Red >> 8) + (_greenFactor * pixel.Green >> 8) + (_blueFactor * pixel.Blue >> 8));
 
-		pixel.Red = (byte)luminance;
-		pixel.Green = (byte)luminance;
-		pixel.Blue = (byte)luminance;
+		pixel.Red = luminance;
+		pixel.Green = luminance;
+		pixel.Blue = luminance;
 	}
 
 	private bool AreColorsMatching(Pixel originalPixel, Color targetColor)
 	{
-		double difference =
-			Math.Pow(originalPixel.Red - targetColor.R, 2) +
-			Math.Pow(originalPixel.Green - targetColor.G, 2) +
-			Math.Pow(originalPixel.Blue - targetColor.B, 2);
+		double a = Math.Pow(originalPixel.Red - targetColor.R, 2);
+		double b = Math.Pow(originalPixel.Green - targetColor.G, 2);
+		double c = Math.Pow(originalPixel.Blue - targetColor.B, 2);
 
-		return difference <= Math.Pow(_threshold, 2);
+		double difference = a + b + c;
+
+		return (int)difference <= (int)Math.Pow(_threshold, 2);
 	}
 }

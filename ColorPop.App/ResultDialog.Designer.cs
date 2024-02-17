@@ -85,7 +85,7 @@ partial class ResultDialog
 		lblProcessingTime.Name = "lblProcessingTime";
 		lblProcessingTime.Size = new Size(533, 24);
 		lblProcessingTime.TabIndex = 2;
-		lblProcessingTime.Text = "Processing time: {0} ms";
+		lblProcessingTime.Text = "Processing time: {0} μs";
 		lblProcessingTime.TextAlign = ContentAlignment.MiddleLeft;
 		// 
 		// ResultDialog

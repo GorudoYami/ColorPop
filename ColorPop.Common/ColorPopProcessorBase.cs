@@ -5,12 +5,12 @@ namespace ColorPop.Common;
 
 public abstract class ColorPopProcessorBase : IColorPopProcessor
 {
-	public long ProcessingTimeMilliseconds { get; set; }
+	public long ProcessingTimeMicroseconds { get; set; }
 
 	protected readonly byte[] _bitmapData;
-	protected readonly double _redFactor;
-	protected readonly double _greenFactor;
-	protected readonly double _blueFactor;
+	protected readonly int _redFactor;
+	protected readonly int _greenFactor;
+	protected readonly int _blueFactor;
 	protected IEnumerable<Color> _colors;
 	protected int _threshold;
 	protected int _threadCount;
@@ -21,9 +21,9 @@ public abstract class ColorPopProcessorBase : IColorPopProcessor
 		_colors = colors;
 		_threshold = threshold;
 		_threadCount = threadCount;
-		_redFactor = 0.299;
-		_greenFactor = 0.587;
-		_blueFactor = 0.114;
+		_redFactor = 78;
+		_greenFactor = 153;
+		_blueFactor = 24;
 	}
 
 	public async Task<byte[]> ProcessAsync()
@@ -51,7 +51,7 @@ public abstract class ColorPopProcessorBase : IColorPopProcessor
 		await Task.WhenAll(tasks);
 
 		stopwatch.Stop();
-		ProcessingTimeMilliseconds = stopwatch.ElapsedMilliseconds;
+		ProcessingTimeMicroseconds = (long)Math.Round(stopwatch.Elapsed.TotalMicroseconds, 0);
 
 		return _bitmapData;
 	}

@@ -4,7 +4,7 @@ namespace ColorPop.Common;
 
 public interface IColorPopProcessor
 {
-	long ProcessingTimeMilliseconds { get; }
+	long ProcessingTimeMicroseconds { get; }
 
 	Task<byte[]> ProcessAsync();
 }

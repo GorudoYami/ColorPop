@@ -12,7 +12,7 @@ namespace ColorPop.App;
 
 public partial class ResultDialog : Form
 {
-	private const string _labelFormat = "Processing time: {0} ms";
+	private const string _labelFormat = "Processing time: {0} μs";
 	public ResultDialog(Bitmap bitmap, long processingTimeMilliseconds)
 	{
 		InitializeComponent();

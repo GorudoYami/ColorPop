@@ -1,9 +1,8 @@
-using ColorPop.App.Models;
+﻿using ColorPop.App.Models;
 using ColorPop.AsmProcessor;
 using ColorPop.Common;
 using ColorPop.Processor;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
@@ -102,7 +101,7 @@ public partial class MainWindow : Form
 		byte[] processedBitmapData = await processor.ProcessAsync();
 		using var processedBitmap = new Bitmap(tbImageLocation.Text);
 		SetBitmapData(processedBitmap, processedBitmapData);
-		ShowResult(processedBitmap, processor.ProcessingTimeMilliseconds);
+		ShowResult(processedBitmap, processor.ProcessingTimeMicroseconds);
 	}
 
 	private byte[] GetBitmapData()
@@ -276,10 +275,10 @@ public partial class MainWindow : Form
 			byte[] bitmapData = GetBitmapData();
 			var processor = ResolveProcessor(bitmapData, colors, threshold, threadCount);
 			await processor.ProcessAsync();
-			times.Add(processor.ProcessingTimeMilliseconds);
+			times.Add(processor.ProcessingTimeMicroseconds);
 		}
 
 		long averageTime = (long)times.Average();
-		MessageBox.Show($"Average processing time: {averageTime} ms", "Average processing time", MessageBoxButtons.OK, MessageBoxIcon.Information);
+		MessageBox.Show($"Average processing time: {averageTime} μs", "Average processing time", MessageBoxButtons.OK, MessageBoxIcon.Information);
 	}
 }

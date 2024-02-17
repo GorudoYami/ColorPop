@@ -6,66 +6,75 @@
 ; [rsp + 28h] - Target colors array length
 ; [rsp + 30h] - Bitmap data array pointer
 ;
-; r10 - Enumerator of bitmap data array
-; r11 - End of bitmap data array
-; r12 - Enumerator of target colors array
-; r13 - End of target colors array
+; rcx - Enumerator of bitmap data array
+; rdx - End of bitmap data array
+; r8 - Enumerator of target colors array
+; r10 - End of target colors array
 
 .data
-indicies_d dd 0, 9, 2, 11, 4, 13, 6, 15, 8, 1, 10, 3, 12, 5, 14, 7
-indicies_q dq 0, 4, 2, 6, 1, 5, 3, 7
-weights db 38, 75, 15, 0, 38, 75, 15, 0, 38, 75, 15, 0, 38, 75, 15, 0
+indicies dd 0, 8, 2, 10, 4, 12, 6, 14, 1, 9, 3, 11, 5, 13, 7, 15
+weights db 20, 125, 58, 0, 20, 125, 58, 0, 20, 125, 58, 0, 20, 125, 58, 0
 shuffle_mask db 0, 0, 0, 0, 4, 4, 4, 4, 8, 8, 8, 8, 12, 12, 12, 12
+blend_mask db 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128
 
 .code
 ProcessChunk PROC
-	; Calculate start address of bitmap data array
-	mov rax, [rsp + 30h]
-	add rax, rcx
-	mov r10, rax
-
-	; Calculate end address of bitmap data array
-	mov rax, [rsp + 30h]
-	add rax, rdx
-	mov r11, rax
-
-	; Calculate end address of target colors array
-	mov rax, [rsp + 28h]
-	add rax, r9
-	mov r13, rax
-
-	; Load indicies_d into zmm11
-	vmovdqa32 zmm11, DWORD PTR [indicies_d]
-
-	; Load indicies_q into zmm12
-	vmovdqa64 zmm12, QWORD PTR [indicies_q]
+	; Initialize mask for blend
+	vmovdqa ymm12, YMMWORD PTR [blend_mask]
 
 	; Broadcast threshold value and square
 	movd xmm0, r8d
 	vpbroadcastd ymm13, xmm0
 	vpmulld ymm13, ymm13, ymm13
 
-	; Initialize xmm7 with the weights for the R, G, and B channels
+	; Calculate start address of bitmap data array
+	mov rax, [rsp + 30h]
+	add rax, rcx
+	mov rcx, rax
+
+	; Calculate end address of bitmap data array
+	mov rax, [rsp + 30h]
+	add rax, rdx
+	mov rdx, rax
+
+	; Calculate end address of target colors array
+	mov rax, [rsp + 28h]
+	add rax, r9
+	mov r10, rax
+
+	; Load indicies into zmm11
+	vmovdqa32 zmm11, DWORD PTR [indicies]
+
+	; Initialize xmm14 with the weights for luminosity calculation
 	movdqa xmm14, XMMWORD PTR [weights]
 
-	; Initialize xmm8 with the shuffle mask
+	; Initialize xmm15 with the shuffle mask
 	movdqa xmm15, XMMWORD PTR [shuffle_mask]
 
-_big_loop:
-	mov r12, r9								; Load colors array pointer into r12
+_loop:
+	; Check if we can process pixels
+	add rcx, 32
+	cmp rdx, rcx
+	js _end
+	sub rcx, 32
 
-	cmp r11, r10							; Check if we reached the end of the bitmap data array
-	jz _end									; If yes, then jump to the end
-	js _end									; If not but there's still data left, jump to smaller loop
+	; Load colors array pointer into r12
+	mov r8, r9								
 
 	; Load data from bitmap data array into ymm0
-	vmovdqu ymm0, YMMWORD PTR [r10]
+	vmovdqu ymm0, YMMWORD PTR [rcx]
 
-_big_color_loop:
-	cmp r13, r12							; Check if we reached the end of the target colors array
-	jz _big_color_loop_end					; If yes, then jump to the end of this loop
+	; Reset mask
+	kxnord k1, k1, k1
 
-	vpbroadcastd ymm1, DWORD PTR [r12]		; Spread color bytes to the whole register
+_color_loop:
+	; Check if we reached the end of the target colors array
+	add r8, 4
+	cmp r10, r8
+	js _color_loop_end
+	sub r8, 4
+
+	vpbroadcastd ymm1, DWORD PTR [r8]		; Spread color bytes to the whole register
 
 	; Calculate the difference between the colors
 	vpsubusb ymm2, ymm0, ymm1
@@ -77,20 +86,25 @@ _big_color_loop:
 
 	; Sum the differences for each pixel
 	vpermd zmm2, zmm11, zmm2				; Permutate the pixel bytes into lower and upper halves
-	vextracti64x4 ymm3, zmm2, 1
+	vextracti32x8 ymm3, zmm2, 1
 	vpmovzxwd zmm3, ymm3
-	vextracti64x4 ymm4, zmm2, 0
+	vextracti32x8 ymm4, zmm2, 0
 	vpmovzxwd zmm4, ymm4
 	vpaddd zmm2, zmm3, zmm4
 
-	vpermq zmm2, zmm12, zmm2
-	vextracti64x4 ymm3, zmm2, 1
-	vextracti64x4 ymm4, zmm2, 0
+	vpermd zmm2, zmm11, zmm2
+	vextracti32x8 ymm3, zmm2, 1
+	vextracti32x8 ymm4, zmm2, 0
 	vpaddd ymm2, ymm3, ymm4
 
 	; Compare the sum of squares with the threshold
-	vpcmpgtd k1, ymm2, ymm13
+	vpcmpgtd k2, ymm2, ymm13
+	kandd k1, k2, k2
 
+	add r8, 4
+	jmp _color_loop
+
+_color_loop_end:
 	; Calculate luminosity for each pixel
 
 	; Lower half
@@ -105,18 +119,16 @@ _big_color_loop:
 	vpsrlw xmm2, xmm2, 8					; Shift right to divide by 256
 	vpshufb xmm2, xmm2, xmm15				; Shuffle bytes to replicate luminosity
 
-	vinserti128 ymm0, ymm1, xmm2, 1			; Insert result
+	vinserti128 ymm1, ymm1, xmm2, 1			; Insert result
+	vpblendvb ymm1, ymm1, ymm0, ymm12
 
 	; Write luminosity to memory
-	vmovdqu32 DWORD PTR [r10] {k1}, ymm0
+	vmovdqu32 DWORD PTR [rcx] {k1}, ymm1
 
-	add r12, 4								
-	jmp _big_color_loop						; Jump to the beginning of big color loop
-
-_big_color_loop_end:
-	add r10, 32								; Increment bitmap data array pointer
-	jmp _big_loop							; Jump to the beginning of big loop
+	add rcx, 32								; Increment bitmap data array pointer
+	jmp _loop								; Jump to the beginning of loop
 _end:
+	mov rax, 0
 	RET
 ProcessChunk ENDP
 end
